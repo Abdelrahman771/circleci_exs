@@ -1,24 +1,40 @@
 
 version: 2.1
-jobs:
-  save_hello_world_output:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - run:
-          command: echo "Hello, World From output!">  ~/OUTPUT.txt
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - OUTPUT.txt
+#reusable code
 
-  print_output_file:
+commands:
+  print_pipeline_id:
+    steps:
+      - run: echo ${CIRCLE_WORKFLOW_ID}
+
+jobs:
+  my_job:
     docker:
       - image: circleci/node:13.8.0
     steps:
-      - attach_workspace:
-          at: ~/
-      - run: cat ~/OUTPUT.txt
+      - print_pipeline_id
+
+
+#--------------------------------------------------
+      #hello world using workspace
+  # save_hello_world_output:
+  #   docker:
+  #     - image: cimg/base:stable
+  #   steps:
+  #     - run:
+  #         command: echo "Hello, World From output!">  ~/OUTPUT.txt
+  #     - persist_to_workspace:
+  #         root: ~/
+  #         paths:
+  #           - OUTPUT.txt
+
+  # print_output_file:
+  #   docker:
+  #     - image: circleci/node:13.8.0
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run: cat ~/OUTPUT.txt
 
   # say-hello:
   #   docker:
@@ -45,12 +61,14 @@ jobs:
   #           echo $my_env_var
   
 workflows:
+
   say-hello-workflow:
     jobs:
-      - save_hello_world_output
-      - print_output_file:
-          requires:
-            - save_hello_world_output
+     - my_job
+  #     - save_hello_world_output
+  #     - print_output_file:
+  #         requires:
+  #           - save_hello_world_output
       # - say-hello
       # - say-world:
       #     requires:
