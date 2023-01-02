@@ -6,7 +6,7 @@ jobs:
       - image: cimg/base:stable
     steps:
       - run:
-          command: echo "Hello, World From output!"> OUTPUT.txt
+          command: echo "Hello, World From output!">  ~/OUTPUT.txt
       - persist_to_workspace:
           root: ~/
           paths:
