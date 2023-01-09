@@ -8,15 +8,34 @@ version: 2.1
 #       - run: echo ${CIRCLE_WORKFLOW_ID}
 
 jobs:
-  onfail:
+
+#Infrastructure pipeline
+create_infrastructure: 
       docker:
-        - image: circleci/node:13.8.0
+        - image: amazon/aws-cli
       steps:
-        - run: exit 1
+        - checkout
         - run:
-            name: on error
-            command: echo "Hello Error!"
-            when: on_fail
+            name: Create Cloudformation Stack
+            command: |
+              aws cloudformation deploy \
+                --template-file template.yml \
+                --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
+                --region us-east-1
+
+
+
+
+
+  # onfail:
+  #     docker:
+  #       - image: circleci/node:13.8.0
+  #     steps:
+  #       - run: exit 1
+  #       - run:
+  #           name: on error
+  #           command: echo "Hello Error!"
+  #           when: on_fail
 
   # my_job:
   #   docker:
@@ -73,9 +92,11 @@ jobs:
 workflows:
   say-hello-workflow:
     jobs:
-    - onfail
+      - create_infrastructure
 
 
+
+    # - onfail
      # - my_job
   #     - save_hello_world_output
   #     - print_output_file:
