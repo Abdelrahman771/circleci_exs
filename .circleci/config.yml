@@ -102,11 +102,13 @@ jobs:
     docker:
       - image: alpine:latest
     steps:
+      - checkout
+      - install_awscli
+      - install_nodejs
       - run:
           name: Test job
           # Fail the job intentionally to simulate an error.
           command:  return 1
-      -install_awscli
       - destroy-environment 
 
 
