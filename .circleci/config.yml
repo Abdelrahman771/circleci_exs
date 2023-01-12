@@ -8,7 +8,8 @@ version: 2.1
 #   print_pipeline_id:
 #     steps:
 #       - run: echo ${CIRCLE_WORKFLOW_ID}
-
+orbs:
+  aws-cli: circleci/aws-cli@3.1.4
 commands:
   destroy_environment:
     steps:
@@ -16,7 +17,7 @@ commands:
           name: Destroy environment
           when: on_fail
           command: |
-            ./bin/aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7}
+            aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7}
 
 jobs:
 
