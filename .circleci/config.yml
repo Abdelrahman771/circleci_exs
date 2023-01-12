@@ -6,25 +6,27 @@ version: 2.1
 #   print_pipeline_id:
 #     steps:
 #       - run: echo ${CIRCLE_WORKFLOW_ID}
-#automate ansible 
+
 jobs:
 
-   configure_infrastructure: 
-    docker:
-      - image: python:3.7-alpine3.11
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints: ["4e:25:d1:5a:5d:f5:fc:a2:d8:e6:bd:f7:1e:61:e7:7e"] # You can get this ID in the section where you registered the SSH Key
-      - run:
-          name: Install dependencies
-          command: |
-            # install the dependencies needed for your playbook
-            apk add --update ansible 
-      - run:
-          name: Configure server
-          command: |
-            ansible-playbook -i inventory.txt remotemain.yml
+
+  #automate ansible 
+  #  configure_infrastructure: 
+  #   docker:
+  #     - image: python:3.7-alpine3.11
+  #   steps:
+  #     - checkout
+  #     - add_ssh_keys:
+  #         fingerprints: ["4e:25:d1:5a:5d:f5:fc:a2:d8:e6:bd:f7:1e:61:e7:7e"] # You can get this ID in the section where you registered the SSH Key
+  #     - run:
+  #         name: Install dependencies
+  #         command: |
+  #           # install the dependencies needed for your playbook
+  #           apk add --update ansible 
+  #     - run:
+  #         name: Configure server
+  #         command: |
+  #           ansible-playbook -i inventory.txt remotemain.yml
 
 
 
@@ -32,20 +34,29 @@ jobs:
 
 
 #Infrastructure pipeline
-  # create_infrastructure: 
-  #       docker:
-  #         - image: amazon/aws-cli
-  #       steps:
-  #         - checkout
-  #         - run:
-  #             name: Create Cloudformation Stack
-  #             command: |
-  #               aws cloudformation deploy \
-  #                 --template-file template.yml \
-  #                 --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
-  #                 --region us-east-1
+  create_infrastructure: 
+        docker:
+          - image: amazon/aws-cli
+        steps:
+          - checkout
+          - run:
+              name: Create Cloudformation Stack
+              command: |
+                aws cloudformation deploy \
+                  --template-file template.yml \
+                  --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
+                  --region us-east-1
 
 
+  smoke_test:
+      docker:
+        - image: alpine:latest
+      steps:
+        - run:
+            name: Test job
+            # Fail the job intentionally to simulate an error.
+            command:  return 1
+        - destroy_environment  
 
 
 
