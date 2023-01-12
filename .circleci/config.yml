@@ -15,7 +15,6 @@ commands:
     steps:
       - run:
           name: Destroy environment
-          when: on_fail
           command: aws cloudformation delete-stack --stack-name myStack
 
 jobs:
@@ -55,18 +54,10 @@ jobs:
                 aws cloudformation deploy \
                   --template-file template.yml \
                   --stack-name myStack \
-                  --region us-east-1
+          - run: return 1
+          - destroy_environment
+            when: on_fail
 
-  smoke_test:
-    docker:
-      - image: alpine:latest
-    steps:
-      - run: apk add --no-cache aws-cli
-      - run:
-          name: Test job
-          # Fail the job intentionally to simulate an error.
-          command:  return 1
-      - destroy_environment  
 
 
   # onfail:
@@ -136,7 +127,6 @@ workflows:
     jobs:
       # - configure_infrastructure
       - create_infrastructure
-      - smoke_test
       
 
 
