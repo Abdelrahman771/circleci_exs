@@ -10,13 +10,13 @@ version: 2.1
 #       - run: echo ${CIRCLE_WORKFLOW_ID}
 
 commands:
-   destroy_environment:
-      steps:
-        - run:
-            name: Destroy environment
-            when: on_fail
-            command: |
-              aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7}
+  destroy_environment:
+    steps:
+      - run:
+          name: Destroy environment
+          when: on_fail
+          command: |
+            ~/.local/bin/aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7}
 
 jobs:
 
