@@ -9,14 +9,16 @@ version: 2.1
 #     steps:
 #       - run: echo ${CIRCLE_WORKFLOW_ID}
 commands:
-  destroy_environment:
-    steps:
-      - run: echo "export PATH='$PATH:/root/.local/bin'" >> $BASH_ENV
-      - run:
-          name: Destroy environment
-          when: on_fail
-          command: |
-            aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7}
+   # Exercise - Rollback
+   destroy_environment:
+     steps:
+       - run:
+           name: Destroy environment
+           # ${CIRCLE_WORKFLOW_ID} is a Built-in environment variable 
+           # ${CIRCLE_WORKFLOW_ID:0:5} takes the first 5 chars of the variable CIRCLE_CI_WORKFLOW_ID 
+           when: on_fail
+           command: |
+             aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7}
 
 jobs:
 
@@ -44,30 +46,30 @@ jobs:
 
 
 
-#Infrastructure pipeline
+  #Infrastructure pipeline
+  # Exercise - Rollback
   create_infrastructure: 
-        docker:
-          - image: amazon/aws-cli
-        steps:
-          - checkout
-          - run:
-              name: Create Cloudformation Stack
-              command: |
-                aws cloudformation deploy \
-                  --template-file template.yml \
-                  --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
-                  --region us-east-1
-
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Create Cloudformation Stack
+          command: |
+            aws cloudformation deploy \
+              --template-file template.yml \
+              --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7} \
+              --region us-east-1
 
   smoke_test:
-      docker:
-        - image: alpine:latest
-      steps:
-        - run:
-            name: Test job
-            # Fail the job intentionally to simulate an error.
-            command:  return 1
-        - destroy_environment  
+    docker:
+      - image: alpine:latest
+    steps:
+      - run:
+          name: Test job
+          # Fail the job intentionally to simulate an error.
+          command:  return 1
+      - destroy_environment 
 
 
 
