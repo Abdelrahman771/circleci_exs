@@ -1,61 +1,22 @@
+
 version: 2.1
 
 
+#reusable code
+
+# commands:
+#   print_pipeline_id:
+#     steps:
+#       - run: echo ${CIRCLE_WORKFLOW_ID}
 orbs:
-  aws-cli: circleci/aws-cli@2.0.3
-
+  aws-cli: circleci/aws-cli@3.1.4
 commands:
-  notify_on_failure:
-    steps:
-      - slack/notify:
-          event: fail
-          channel: cicd-pipeline
-          template: basic_fail_1
-
-  install_awscli:
-    description : Install AWS CLI v2
-    steps :
-      - run :
-         name : Install AWS CLI v2
-         command : |
-           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-           unzip awscliv2.zip
-           sudo ./aws/install
-  install_ansible :
-    description : Install Ansible 
-    steps :
-      - run :
-          name : Install Ansible 
-          command : |
-            sudo apt update                                     
-            sudo apt install software-properties-common
-            sudo add-apt-repository --yes --update ppa:ansible/ansible
-            sudo apt install ansible -y
-  install_nodejs:
-    description: Install Node.js 13
+  destroy_environment:
     steps:
       - run:
-          name: Install Node.js 13
-          command: |
-            # Install Node.js LTS version as our base Node.js version
-            curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-            sudo apt install -y nodejs
-            
-            # Use n version manager to use Node.js v13.8.0
-            sudo npm install --global n
-            sudo n 13.8.0
-  destroy-environment:
-    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-    parameters:
-      Workflow_ID:
-        type: string
-        default: ${CIRCLE_WORKFLOW_ID:0:7}
-    steps:
-      - run:
-          name: Destroy environments
+          name: Destroy environment
           when: on_fail
-          command: |
-            aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5}
+          command: aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7}
 
 jobs:
 
@@ -83,31 +44,37 @@ jobs:
 
 
 
-  #Infrastructure pipeline
-  # Exercise - Rollback
+#Infrastructure pipeline
   create_infrastructure: 
+        docker:
+          - image: amazon/aws-cli
+        steps:
+          - checkout
+          - run:
+              name: Create Cloudformation Stack
+              command: |
+                aws cloudformation deploy \
+                  --template-file template.yml \
+                  --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
+                  --region us-east-1
+
+   smoke_test:
     docker:
-      - image: amazon/aws-cli
+      - image: alpine:latest
     steps:
-      - checkout
+      - run: apk add --update curl
       - run:
-          name: Create Cloudformation Stack
+          name: smoke test
           command: |
-            aws cloudformation deploy \
-              --template-file template.yml \
-              --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7} \
-              --region us-east-1
-
-  smoke_test:
-    docker:
-      - image: amazon/aws-cli
-    steps:
-      - run:
-          name: Test job
-          # Fail the job intentionally to simulate an error.
-          command:  return 1
-      - destroy-environment 
-
+            URL="https://blog.udacity1231321.com/"
+            # Test if website exists
+            if curl -s --head ${URL} 
+            then
+              return 0
+            else
+              return 1
+            fi
+      - destroy_environment 
 
 
   # onfail:
