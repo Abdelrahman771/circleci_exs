@@ -2,7 +2,7 @@ version: 2.1
 
 
 orbs:
-  slack: circleci/slack@4.9.3
+  aws-cli: circleci/aws-cli@2.0.3
 
 commands:
   notify_on_failure:
@@ -100,11 +100,8 @@ jobs:
 
   smoke_test:
     docker:
-      - image: alpine:latest
+      - image: amazon/aws-cli
     steps:
-      - checkout
-      - install_awscli
-      - install_nodejs
       - run:
           name: Test job
           # Fail the job intentionally to simulate an error.
