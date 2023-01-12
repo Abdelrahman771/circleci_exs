@@ -106,6 +106,7 @@ jobs:
           name: Test job
           # Fail the job intentionally to simulate an error.
           command:  return 1
+      -install_awscli
       - destroy-environment 
 
 
