@@ -125,9 +125,10 @@ jobs:
 workflows:
   say-hello-workflow:
     jobs:
-      - configure_infrastructure
+      # - configure_infrastructure
       
-      # - create_infrastructure
+      - create_infrastructure
+      - smoke_test
 
 
 
