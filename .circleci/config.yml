@@ -19,7 +19,24 @@ commands:
           command: aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7}
 
 jobs:
-
+  smoke_test:
+    docker:
+      - image: alpine:latest
+    steps:
+      - run: apk add --update curl
+      - run: apk add --no-cache aws-cli
+      - run:
+          name: smoke test
+          command: |
+            URL="https://blog.udacity1231321.com/"
+            # Test if website exists
+            if curl -s --head ${URL} 
+            then
+              return 0
+            else
+              return 1
+            fi
+      - destroy_environment 
 
   #automate ansible 
   #  configure_infrastructure: 
@@ -58,24 +75,6 @@ jobs:
                   --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
                   --region us-east-1
 
-  smoke_test:
-    docker:
-      - image: alpine:latest
-    steps:
-      - run: apk add --update curl
-      - run: apk add --no-cache aws-cli
-      - run:
-          name: smoke test
-          command: |
-            URL="https://blog.udacity1231321.com/"
-            # Test if website exists
-            if curl -s --head ${URL} 
-            then
-              return 0
-            else
-              return 1
-            fi
-      - destroy_environment 
 
 
   # onfail:
@@ -144,9 +143,9 @@ workflows:
   say-hello-workflow:
     jobs:
       # - configure_infrastructure
-      
-      - create_infrastructure
       - smoke_test
+      - create_infrastructure
+      
 
 
 
