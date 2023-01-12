@@ -20,7 +20,6 @@ commands:
 
 jobs:
 
-
   #automate ansible 
   #  configure_infrastructure: 
   #   docker:
@@ -58,17 +57,16 @@ jobs:
                   --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7} \
                   --region us-east-1
 
-
   smoke_test:
     docker:
       - image: alpine:latest
     steps:
+      - run: apk add --no-cache aws-cli
       - run:
           name: Test job
           # Fail the job intentionally to simulate an error.
           command:  return 1
       - destroy_environment  
-
 
 
   # onfail:
