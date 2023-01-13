@@ -114,7 +114,7 @@ jobs:
           # Use $OldBucketID environment variable or mybucket644752792305 below.
           # Similarly, you can create and use $OldStackID environment variable in place of production-distro 
           command: |
-            export OldBucketID=$(cat ~/textfile.txt)
+            export OldBucketID=$(cat textfile.txt)
             aws s3 rm "s3://${OldBucketID}" --recursive
 
   # onfail:
@@ -185,15 +185,15 @@ workflows:
       # - configure_infrastructure
       # - create_infrastructure
 
-      - create_and_deploy_front_end
-      - promote_to_production:
-          requires: 
-            - create_and_deploy_front_end
-      - get_last_deployment_id
-      - clean_up_old_front_end:
-          requires:
-            - get_last_deployment_id
-            - promote_to_production
+       - create_and_deploy_front_end
+        - promote_to_production:
+            requires: 
+              - create_and_deploy_front_end
+        - get_last_deployment_id
+        - clean_up_old_front_end:
+            requires:
+              - get_last_deployment_id
+              - promote_to_production
       
 
 
